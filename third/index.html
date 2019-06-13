@@ -1,0 +1,267 @@
+<html>
+    <head>
+        <style>
+            * {
+                padding: 0;
+                margin: 0;
+            }
+            ::selection {
+                background: transparent;
+            }
+            html {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+            }
+            html body {
+                padding: 0;
+                margin: 0;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+            }
+            #pasteBox {
+                height: 0px;
+                position: fixed;
+                top: -100px;
+                left: -100px;
+            }
+            #status-box {
+                position: absolute;
+                top: 5px;
+                left: 5px;
+                right: 5px;
+                font-size: 24px;
+            }
+            #admin-panel {
+                position: absolute;
+                top: 0;
+                right: 0;
+                left: 0;
+                bottom: 0;
+                overflow-y: scroll;
+            }
+            #project-tree {
+                overflow: auto;
+                font-size: 12px;
+            }
+            #project-tree .dir-name {
+                color: green;
+                font-weight: bold;
+                cursor: pointer;
+            }
+            #project-tree .dir-contents {
+                padding-left: 20px;
+            }
+            #project-tree .dir-contents .file {
+                color: blue;
+                cursor: pointer;
+            }
+            #project-tree .dir-contents .file:hover {
+                color: red;
+            }
+            #console {
+                font-size: 22px;
+            }
+            #console pre {
+                width: 100%;
+                display: inline-block;
+                padding: 0;
+            }
+            #console-prompt {
+                font-size: 22px;
+                float: left;
+                color: blue;
+                text-align: right;
+            }
+            #console-input {
+                width: 80%;
+                padding: 0.1em;
+                font-size: 22px;
+                float: left;
+            }
+            #console-input:focus {
+                border: 2px solid blue;
+            }
+            #eval-button {
+                font-size: 20px;
+                padding: 1em;
+            }
+            #console-output {
+                width: 100%;
+            }
+            #message-box {
+                position: absolute;
+                top: 0;
+                right: 0;
+                left: 0;
+                bottom: 10%;
+                overflow-y: scroll;
+            }
+            #message-input {
+                font-size: 24px;
+                display: block;
+                position: absolute;
+                right: 0;
+                left: 0;
+                bottom: 0;
+                width: 100%;
+            }
+            #message-input:focus {
+                border: 2px solid blue;
+            }
+            #text-editor-wrapper {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                overflow-y: auto;
+                overflow-x: wrap;
+            }
+            #text-editor-wrapper:focus {
+                border: 2px solid blue;
+            }
+            #text-editor {
+                font-size: 24px;
+            }
+            #text-editor > div {
+                min-height: 1em;
+            }
+            .read-write {
+                font-weight: bold;
+                cursor: pointer;
+            }
+            .read-write.red {
+                color: red;
+            }
+            .read-write.green {
+                color: green;
+            }
+            .read-write.blue {
+                color: blue;
+            }
+            .selection-box {
+                margin: 0;
+                padding: 0;
+                display: inline-block;
+                border: 1px solid black;
+            }
+            .cursor {
+                margin: 0;
+                padding: 0;
+                display: inline-block;
+                width: 2px;
+                height: 1em;
+                background-color: black;
+                position: relative;
+            }
+            .cursor::after {
+                position: absolute;
+                top: -0.5em;
+                left: 0;
+                color: white;
+                font-size: 10px;
+            }
+            .cursor.cursor-0 {
+                background-color: white;
+            }
+            .cursor.cursor-1,
+            .cursor.cursor-1::after {
+                background-color: black;
+            }
+            .color-1 {
+                color: black;
+            }
+            .cursor.cursor-2,
+            .cursor.cursor-2::after {
+                background-color: blue;
+            }
+            .color-2 {
+                color: blue;
+            }
+            .cursor.cursor-3,
+            .cursor.cursor-3::after {
+                background-color: green;
+            }
+            .color-3 {
+                color: green;
+            }
+            .cursor.cursor-4,
+            .cursor.cursor-4::after {
+                background-color: red;
+            }
+            .color-4 {
+                color: red;
+            }
+            .cursor.cursor-5,
+            .cursor.cursor-5::after {
+                background-color: purple;
+            }
+            .color-5 {
+                color: purple;
+            }
+        </style>
+
+        <link rel="stylesheet" type="text/css" href="prism.css">
+
+        <link rel="stylesheet" type="text/css" href="jquery-easyui/themes/default/easyui.css">
+        <link rel="stylesheet" type="text/css" href="jquery-easyui/themes/icon.css">
+        <link rel="stylesheet" type="text/css" href="jquery-easyui/demo/demo.css">
+        <script type="text/javascript" src="jquery-easyui/jquery.min.js"></script>
+        <script type="text/javascript" src="jquery-easyui/jquery.easyui.min.js"></script>
+
+        <style type="text/css"></style>
+    </head>
+    <body>
+        <div id="cc" class="easyui-layout" style="width:100%;height:100%;">
+            <div data-options="region:'north'" style="height:50px">
+                <div id='status-box'></div>
+            </div>
+            <div data-options="region:'east',split:true" style="width:30%;">
+                <div id="right-panel" class="easyui-layout" style="width:100%;height:100%;">
+                    <div data-options="region:'north',split:true" style="height:50%;">
+                        <div id='admin-panel'></div>
+                    </div>
+                    <div data-options="region:'center',split:true" style="height:50%;">
+                        <div id='message-box'></div>
+                        <input id='message-input' onKeydown='javascript:if(event.keyCode==13) send_message();'/>
+                    </div>
+                </div>
+            </div>
+            <div data-options="region:'west',split:true" style="width:20%;">
+                <div id="project-tree"></div>
+            </div>
+            <div id="console-panel" data-options="region:'south',split:true" style="height:100px;">
+                <div id="console-wrapper">
+                    <div id="console"></div>
+
+                    <div id="console-prompt">Command: </div>
+                    <textarea id="console-input"></textarea>
+                    <button id="eval-button">Evaluate Code</button>
+                    <pre id="console-output"></pre>
+                </div>
+            </div>
+            <div data-options="region:'center'">
+                <div id="text-editor-wrapper" class="language-python" >
+                    <pre id="text-editor" tabindex="1"></pre>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!--<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g=" crossorigin="anonymous"></script>-->
+        <!--<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>-->
+
+        <!-- <script type="text/javascript" src="jquery-3.2.1.slim.min.js"></script> -->
+        <script type="text/javascript" src="prism.js"></script>
+        <script type="text/javascript" src="socket.io.min.js"></script>
+        <script type="text/javascript" src="js.cookie.js"></script>
+        <script type="text/javascript" src="script.js" charset="utf-8"></script>
+    </body>
+</html>
